@@ -48,6 +48,7 @@ function escapeHtmlAttribute(value) {
 // 默认设置
 const defaultSettings = {
     insertType: INSERT_TYPE.DISABLED,
+    messengerImageMode: true,
     promptInjection: {
         enabled: true,
         prompt: `<image_generation>
@@ -88,6 +89,10 @@ function updateUI() {
         $('#prompt_injection_depth').val(
             extension_settings[extensionName].promptInjection.depth,
         );
+        $('#messenger_image_mode').prop(
+            'checked',
+            extension_settings[extensionName].messengerImageMode !== false,
+        );
     }
 }
 
@@ -121,6 +126,12 @@ async function loadSettings() {
         if (extension_settings[extensionName].insertType === undefined) {
             extension_settings[extensionName].insertType =
                 defaultSettings.insertType;
+        }
+
+        // 确保messengerImageMode属性存在
+        if (extension_settings[extensionName].messengerImageMode === undefined) {
+            extension_settings[extensionName].messengerImageMode =
+                defaultSettings.messengerImageMode;
         }
     }
 
@@ -177,6 +188,12 @@ async function createSettings(settingsHtml) {
         extension_settings[extensionName].promptInjection.depth = isNaN(value)
             ? 0
             : value;
+        saveSettingsDebounced();
+    });
+
+    // 信使图片模式开关事件处理
+    $('#messenger_image_mode').on('change', function () {
+        extension_settings[extensionName].messengerImageMode = $(this).prop('checked');
         saveSettingsDebounced();
     });
 
@@ -289,7 +306,8 @@ eventSource.on(
                 !extension_settings[extensionName].promptInjection ||
                 !extension_settings[extensionName].promptInjection.enabled ||
                 extension_settings[extensionName].insertType ===
-                    INSERT_TYPE.DISABLED
+                    INSERT_TYPE.DISABLED ||
+                extension_settings[extensionName].messengerImageMode === false
             ) {
                 return;
             }
@@ -370,6 +388,17 @@ async function handleIncomingMessage() {
         matches = singleMatch ? [singleMatch] : [];
     }
     console.log(imgTagRegex, matches);
+
+    // 如果信使图片模式关闭，从消息中去除<pic>标签，只保留文字内容
+    if (extension_settings[extensionName].messengerImageMode === false) {
+        if (matches.length > 0) {
+            message.mes = message.mes.replace(imgTagRegex, '').replace(/\s+/g, ' ').trim();
+            updateMessageBlock(context.chat.length - 1, message);
+            await context.saveChat();
+        }
+        return;
+    }
+
     if (matches.length > 0) {
         // 延迟执行图片生成，确保消息首先显示出来
         setTimeout(async () => {

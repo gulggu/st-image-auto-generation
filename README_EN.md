@@ -15,6 +15,9 @@ This extension automatically generates images when it detects `<pic prompt="..."
   - Insert into current message (inserts into ST's extra array, supports image controls)
   - Inline replacement mode (directly replaces the corresponding tag, does not support image controls)
   - Create new messages with generated images (ST's default image generation method, best compatibility)
+- **Messenger Image Mode toggle** (new feature):
+  - **ON**: When the AI message contains a `<pic prompt="...">` tag, the extension automatically generates and displays an image
+  - **OFF**: The `<pic>` tags are stripped and only the AI's text description is shown (e.g., if the AI says "I sent you a lunchbox photo", only that text is displayed — no image is generated)
 - Simple toggle in the extensions menu
 - Configuration panel in the Extensions settings
 - Customizable prompt template and regexp
@@ -56,7 +59,9 @@ Extension -> Install Extension -> https://github.com/wickedcode01/st-image-auto-
 
 1. Enable the extension by clicking "Auto-generate Image" in the extensions menu
 2. Configure the image insertion type in the Extensions settings panel
-3. When your AI includes `<pic prompt="...">` in its message, the extension will automatically generate the image
+3. Use the **Messenger Image Mode** toggle to control image generation behavior:
+   - **ON**: When your AI includes `<pic prompt="...">` in its message, the extension will automatically generate the image
+   - **OFF**: `<pic>` tags are stripped and only the AI's text response is displayed
 4. **[Optional]** Based on your selected image generation model, provide some good prompt examples to AI.
 
 Example:
